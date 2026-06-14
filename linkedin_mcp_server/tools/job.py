@@ -88,6 +88,7 @@ def register_job_tools(
         work_type: str | None = None,
         easy_apply: bool = False,
         sort_by: str | None = None,
+        time_posted_seconds: int | None = None,
         extractor: Any | None = None,
     ) -> dict[str, Any]:
         """
@@ -106,6 +107,7 @@ def register_job_tools(
             work_type: Filter by work type, comma-separated (on_site, remote, hybrid)
             easy_apply: Only show Easy Apply jobs (default false)
             sort_by: Sort results (date, relevance)
+            time_posted_seconds: Filter to jobs posted within this many seconds (e.g. 3600 for last hour); appends &f_TPR=r{n}&sortBy=DD
 
         Returns:
             Dict with url, sections (name -> raw text), job_ids (list of
@@ -136,6 +138,7 @@ def register_job_tools(
                 work_type=work_type,
                 easy_apply=easy_apply,
                 sort_by=sort_by,
+                time_posted_seconds=time_posted_seconds,
             )
 
             await ctx.report_progress(progress=100, total=100, message="Complete")

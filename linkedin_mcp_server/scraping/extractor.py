@@ -3066,6 +3066,7 @@ class LinkedInExtractor:
         work_type: str | None = None,
         easy_apply: bool = False,
         sort_by: str | None = None,
+        time_posted_seconds: int | None = None,
     ) -> str:
         """Build a LinkedIn job search URL with optional filters.
 
@@ -3077,7 +3078,9 @@ class LinkedInExtractor:
         if location:
             params += f"&location={quote_plus(location)}"
 
-        if date_posted:
+        if time_posted_seconds is not None:
+            params += f"&f_TPR=r{time_posted_seconds}&sortBy=DD"
+        elif date_posted:
             mapped = _DATE_POSTED_MAP.get(date_posted.strip(), date_posted)
             params += f"&f_TPR={quote_plus(mapped)}"
         if job_type:
@@ -3088,7 +3091,7 @@ class LinkedInExtractor:
             params += f"&f_WT={_normalize_csv(work_type, _WORK_TYPE_MAP)}"
         if easy_apply:
             params += "&f_EA=true"
-        if sort_by:
+        if sort_by and time_posted_seconds is None:
             mapped = _SORT_BY_MAP.get(sort_by.strip(), sort_by)
             params += f"&sortBy={quote_plus(mapped)}"
 
@@ -3105,6 +3108,7 @@ class LinkedInExtractor:
         work_type: str | None = None,
         easy_apply: bool = False,
         sort_by: str | None = None,
+        time_posted_seconds: int | None = None,
     ) -> dict[str, Any]:
         """Search for jobs with pagination and job ID extraction.
 
@@ -3122,6 +3126,7 @@ class LinkedInExtractor:
             work_type: Filter by work type (on_site, remote, hybrid)
             easy_apply: Only show Easy Apply jobs
             sort_by: Sort results (date, relevance)
+            time_posted_seconds: Filter to jobs posted within this many seconds; appends &f_TPR=r{n}&sortBy=DD
 
         Returns:
             {url, sections: {search_results: text}, job_ids: [str]}
@@ -3135,7 +3140,10 @@ class LinkedInExtractor:
             work_type=work_type,
             easy_apply=easy_apply,
             sort_by=sort_by,
+            time_posted_seconds=time_posted_seconds,
         )
+        import sys
+        print(f"[linkedin-mcp] search URL: {base_url}", file=sys.stderr, flush=True)
         all_job_ids: list[str] = []
         seen_ids: set[str] = set()
         page_texts: list[str] = []
